@@ -13,7 +13,7 @@ module.exports = function(schema, option) {
   // data
   const datas = [];
 
-  const constants = {};
+  const defaultProps = {};
 
   // methods
   const methods = [];
@@ -35,22 +35,23 @@ module.exports = function(schema, option) {
   const noUnitStyles = ['opacity', 'fontWeight'];
 
   const lifeCycleMap = {
-    '_constructor': 'onLoad',
-    'getDerivedStateFromProps': '',
+    '_constructor': 'created',
+    'getDerivedStateFromProps': 'beforeUpdate',
     'render': '',
-    'componentDidMount': 'onReady',
-    'componentDidUpdate': 'onShow',
-    'componentWillUnmount': 'onUnload'
+    'componentDidMount': 'mounted',
+    'componentDidUpdate': 'updated',
+    'componentWillUnmount': 'beforeDestroy'
   }
 
-  const width = option.responsive.width || 750;
-  const viewportWidth = option.responsive.viewportWidth || 375;
+  // console.log('schema.rect.width: ', schema.rect.width);
+  const width = schema.rect.width || 750;
+  // const viewportWidth = option.responsive.viewportWidth || 750;
 
-  // 1rpx = 750 / width
+  // 1rpx = width / 750 px
   const _w = ( 750 / width);
   console.log(`_w: ${_w}`);
-  const _ratio = width / viewportWidth;
-  console.log(`_ratio: ${_ratio}`);
+  // const _ratio = width / width;
+  // console.log(`_ratio: ${_ratio}`);
 
   const isExpression = (value) => {
     return /^\{\{.*\}\}$/.test(value);
@@ -87,15 +88,17 @@ module.exports = function(schema, option) {
       let value = style[key];
       if (boxStyleList.indexOf(key) != -1) {
         if (toVW) {
-          value = (parseInt(value) / _w).toFixed(2);
+          value = (parseInt(value) * _w).toFixed(2);
           value = value == 0 ? value : value + 'rpx';
         } else {
           value = (parseInt(value)).toFixed(2);
           value = value == 0 ? value : value + 'px';
         }
+        console.log('key: ', key, value);
         styleData.push(`${_.kebabCase(key)}: ${value}`);
       } else if (noUnitStyles.indexOf(key) != -1) {
-        styleData.push(`${_.kebabCase(key)}: ${parseFloat(value)}`);
+        console.log('key: ', key, value);
+        styleData.push(`${_.kebabCase(key)}: ${isNaN(parseFloat(value)) ? value : parseFloat(value) }`);
       } else {
         styleData.push(`${_.kebabCase(key)}: ${value}`);
       }
@@ -118,6 +121,7 @@ module.exports = function(schema, option) {
 
   // parse layer props(static values or expression)
   const parseProps = (value, isReactNode, constantName) => {
+    console.log(`parseProps:`, value, isReactNode, constantName);
     if (typeof value === 'string') {
       if (isExpression(value)) {
         if (isReactNode) {
@@ -128,12 +132,13 @@ module.exports = function(schema, option) {
       }
 
       if (isReactNode) {
-        return value;
+        defaultProps[constantName] = value;
+        return `{{${constantName}}}`;
       } else if (constantName) { // save to constant
-        expressionName[constantName] = expressionName[constantName] ? expressionName[constantName] + 1 : 1;
-        const name = `${constantName}${expressionName[constantName]}`;
-        constants[name] = value;
-        return `"constants.${name}"`;
+        // expressionName[constantName] = expressionName[constantName] ? expressionName[constantName] + 1 : 1;
+        // const name = `${constantName}${expressionName[constantName]}`;
+        defaultProps[constantName] = value;
+        return `"${constantName}"`;
       } else {
         return `"${value}"`;
       }
@@ -280,11 +285,12 @@ module.exports = function(schema, option) {
 
     switch(type) {
       case 'text':
-        const innerText = parseProps(schema.props.text, true);
+        const innerText = parseProps(schema.props.text, true, schema.props.className);
+        console.log(`innerText: ${innerText}`)
         xml = `<span${classString}${props}>${innerText}</span> `;
         break;
       case 'image':
-        const source = parseProps(schema.props.src, false, 'image');
+        const source = parseProps(schema.props.src, false, schema.props.className);
         xml = `<img${classString}${props} :src=${source} /> `;
         break;
       case 'div':
@@ -387,13 +393,34 @@ module.exports = function(schema, option) {
 
   // start parse schema
   transform(schema);
-  datas.push(`constants: ${toString(constants)}`);
+  console.log(`defaultProps: ${JSON.stringify(defaultProps)}`);
+  datas.push(`defaultProps: ${toString(defaultProps)}`);
 
   const prettierOpt = {
     parser: 'vue',
     printWidth: 80,
     singleQuote: true
   };
+
+  // /**
+  //  * @TODO: 将css转为uni-app的css
+  //  * @param {*} css 
+  //  */
+  // const transformCssToBeUniApp = (css) => {
+  //   console.log('css: ', css);
+  //   let styles = boxStyleList.concat(noUnitStyles);
+  //   console.log('styles: ', styles);
+  //   styles.forEach(style => {
+  //     let kebabCaseStyle = _.kebabCase(style);
+  //     console.log(`kebabCaseStyle: `, kebabCaseStyle);
+  //     if (kebabCaseStyle.indexOf('-') > 0) {
+  //       let re = new RegExp(kebabCaseStyle, 'gm');
+  //       console.log('camelCaseStyle: ', _.camelCase(style));
+  //       css = css.replace(re, _.camelCase(style));
+  //     }
+  //   })
+  //   return css;
+  // };
 
   return {
     panelDisplay: [
@@ -407,9 +434,7 @@ module.exports = function(schema, option) {
             ${imports.join('\n')}
             export default {
               data() {
-                return {
-                  ${datas.join(',\n')}
-                } 
+                return ${JSON.stringify(defaultProps)}
               },
               methods: {
                 ${methods.join(',\n')}
