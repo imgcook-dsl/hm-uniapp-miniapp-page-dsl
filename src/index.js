@@ -308,9 +308,10 @@ module.exports = function(schema, option) {
     if (schema.loop) {
       xml = parseLoop(schema.loop, schema.loopArgs, xml)
     }
-    if (schema.condition) {
-      xml = parseCondition(schema.condition, xml);
-    }
+    // @TODO: 还未理解schema.condition的含义，后续继续完成。
+    // if (schema.condition) {
+    //   xml = parseCondition(schema.condition, xml);
+    // }
 
     return xml;
   }
