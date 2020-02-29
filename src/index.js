@@ -94,10 +94,10 @@ module.exports = function(schema, option) {
           value = (parseInt(value)).toFixed(2);
           value = value == 0 ? value : value + 'px';
         }
-        console.log('key: ', key, value);
+        // console.log('key: ', key, value);
         styleData.push(`${_.kebabCase(key)}: ${value}`);
       } else if (noUnitStyles.indexOf(key) != -1) {
-        console.log('key: ', key, value);
+        // console.log('key: ', key, value);
         styleData.push(`${_.kebabCase(key)}: ${isNaN(parseFloat(value)) ? value : parseFloat(value) }`);
       } else {
         styleData.push(`${_.kebabCase(key)}: ${value}`);
@@ -121,7 +121,7 @@ module.exports = function(schema, option) {
 
   // parse layer props(static values or expression)
   const parseProps = (value, isReactNode, constantName) => {
-    console.log(`parseProps:`, value, isReactNode, constantName);
+    // console.log(`parseProps:`, value, isReactNode, constantName);
     if (typeof value === 'string') {
       if (isExpression(value)) {
         if (isReactNode) {
@@ -278,7 +278,7 @@ module.exports = function(schema, option) {
     let props = '';
 
     Object.keys(schema.props).forEach((key) => {
-      if (['className', 'style', 'text', 'src'].indexOf(key) === -1) {
+      if (['className', 'style', 'text', 'src', 'hm-component'].indexOf(key) === -1) {
         props += ` ${parsePropsKey(key, schema.props[key])}="${parseProps(schema.props[key])}"`;
       }
     })
@@ -286,7 +286,7 @@ module.exports = function(schema, option) {
     switch(type) {
       case 'text':
         const innerText = parseProps(schema.props.text, true, schema.props.className);
-        console.log(`innerText: ${innerText}`)
+        // console.log(`innerText: ${innerText}`)
         xml = `<span${classString}${props}>${innerText}</span> `;
         break;
       case 'image':
@@ -297,10 +297,15 @@ module.exports = function(schema, option) {
       case 'page':
       case 'block':
       case 'component':
-        if (schema.children && schema.children.length) {
-          xml = `<div${classString}${props}>${transform(schema.children)}</div>`;
+        // 在这里处理将标记了组件key字段的组件进行替换
+        if (schema.props['hm-component']) {
+          xml = `{{"hm-component=${schema.props['hm-component']}"}}`
         } else {
-          xml = `<div${classString}${props} />`;
+          if (schema.children && schema.children.length) {
+            xml = `<div${classString}${props}>${transform(schema.children)}</div>`;
+          } else {
+            xml = `<div${classString}${props} />`;
+          }
         }
         break;
     }
@@ -394,7 +399,7 @@ module.exports = function(schema, option) {
 
   // start parse schema
   transform(schema);
-  console.log(`defaultProps: ${JSON.stringify(defaultProps)}`);
+  // console.log(`defaultProps: ${JSON.stringify(defaultProps)}`);
   datas.push(`defaultProps: ${toString(defaultProps)}`);
 
   const prettierOpt = {
