@@ -311,7 +311,7 @@ module.exports = function(schema, option) {
       case 'component':
         // 在这里处理将标记了组件key字段的组件进行替换
         if (schema.props['hm-component']) {
-          xml = `{{"hm-component=${schema.props['hm-component']}"}}`
+          xml = `<div class="${schema.props.className}">{{"hm-component=${schema.props['hm-component']}"}}</div>`
         } else {
           if (schema.children && schema.children.length) {
             xml = `<div${classString}${props}>${transform(schema.children)}</div>`;
