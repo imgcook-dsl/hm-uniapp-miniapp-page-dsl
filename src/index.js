@@ -53,7 +53,7 @@ module.exports = function(schema, option) {
   // const _ratio = width / width;
   // console.log(`_ratio: ${_ratio}`);
 
-  // 如果存在本地的.imgcook.json文件，并且此文件配置了 '"responsive": "vw"'，那么使用vw单位， 此函数返回true
+  // 如果组件配置了属性responsive==vw，则返回true
   const isResponsiveVW = () => {
     return schema.props.responsive == 'vw';
   }
