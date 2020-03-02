@@ -287,11 +287,11 @@ module.exports = function(schema, option) {
       case 'text':
         const innerText = parseProps(schema.props.text, true, schema.props.className);
         // console.log(`innerText: ${innerText}`)
-        xml = `<span${classString}${props}>${innerText}</span> `;
+        xml = `<text${classString}${props}>${innerText}</text> `;
         break;
       case 'image':
         const source = parseProps(schema.props.src, false, schema.props.className);
-        xml = `<img${classString}${props} :src=${source} /> `;
+        xml = `<image${classString}${props} :src=${source} /> `;
         break;
       case 'div':
       case 'page':
