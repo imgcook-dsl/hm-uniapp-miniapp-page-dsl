@@ -19,7 +19,8 @@ module.exports = {
       "width": "375px",
       "height": "812px"
     },
-    "className": "find-tutor-page"
+    "className": "find-tutor-page",
+    "responsive": "vw"
   },
   "children": [{
     "componentName": "Image",
