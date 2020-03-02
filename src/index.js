@@ -92,7 +92,7 @@ module.exports = function(schema, option) {
     for (let key in style) {
       let value = style[key];
       if (boxStyleList.indexOf(key) != -1) {
-        // 如果存在本地的.imgcook.json文件，并且此文件配置了 '"responsive": "vw"'，那么使用vw单位.
+        // 如果组件配置了属性responsive==vw，那么使用vw单位.
         if (isResponsiveVW()) {
           value = (parseInt(value) * _w).toFixed(2);
           value = value == 0 ? value : (value*100/750).toFixed(2) + 'vw';
