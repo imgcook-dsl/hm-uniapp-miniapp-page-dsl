@@ -299,11 +299,20 @@ module.exports = function(schema, option) {
       case 'text':
         const innerText = parseProps(schema.props.text, true, schema.props.className);
         // console.log(`innerText: ${innerText}`)
-        xml = `<text${classString}${props}>${innerText}</text> `;
+        if (schema.props['hm-component']) {
+          xml = `<div class="${schema.props.className}">{{"hm-component=${schema.props['hm-component']}"}}</div>`
+        } else {
+          xml = `<text${classString}${props}>${innerText}</text> `;
+        }
         break;
       case 'image':
         const source = parseProps(schema.props.src, false, schema.props.className);
-        xml = `<image${classString}${props} :src=${source} /> `;
+        // 在这里处理将标记了组件key字段的组件进行替换
+        if (schema.props['hm-component']) {
+          xml = `<div class="${schema.props.className}">{{"hm-component=${schema.props['hm-component']}"}}</div>`
+        } else {
+          xml = `<image${classString}${props} :src=${source} /> `;
+        }
         break;
       case 'div':
       case 'page':
