@@ -19,8 +19,7 @@ module.exports = {
       "width": "375px",
       "height": "930px"
     },
-    "className": "profile-subscribe-page",
-    "responsive": "vm"
+    "className": "profile-subscribe-page"
   },
   "children": [{
     "componentName": "Image",
