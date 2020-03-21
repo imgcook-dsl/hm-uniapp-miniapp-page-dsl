@@ -48,6 +48,8 @@ module.exports = function(schema, option) {
   // const viewportWidth = option.responsive.viewportWidth || 750;
 
   // 1rpx = width / 750 px
+  let existDesignWidth = !!schema.props.designWidth;
+  let designWidth = schema.props.designWidth || 750;
   const _w = ( 750 / width);
   console.log(`_w: ${_w}`);
   // const _ratio = width / width;
@@ -87,19 +89,24 @@ module.exports = function(schema, option) {
   };
 
   // convert to responsive unit, such as rpx
-  const parseStyle = (style, toVW) => {
+  const parseStyle = (style, toRpx) => {
     const styleData = [];
     for (let key in style) {
       let value = style[key];
       if (boxStyleList.indexOf(key) != -1) {
         // 如果组件配置了属性responsive==vw，那么使用vw单位.
         if (isResponsiveVW()) {
-          value = (parseInt(value) * _w).toFixed(2);
-          value = value == 0 ? value : (value*100/750).toFixed(2) + 'vw';
+          value = (parseInt(value)).toFixed(2);
+          value = value == 0 ? value : (value*100/designWidth).toFixed(2) + 'vw';
         } else {
-          if (toVW) {
-            value = (parseInt(value) * _w).toFixed(2);
-            value = value == 0 ? value : value + 'rpx';
+          if (toRpx) {
+            if (existDesignWidth) {
+              value = (parseInt(value)).toFixed(2);
+              value = value == 0 ? value : (value*750/designWidth).toFixed(2) + 'rpx';
+            } else {
+              value = (parseInt(value) * _w).toFixed(2);
+              value = value == 0 ? value : value + 'rpx';
+            }
           } else {
             value = (parseInt(value)).toFixed(2);
             value = value == 0 ? value : value + 'px';
@@ -474,11 +481,6 @@ module.exports = function(schema, option) {
           </style>
         `, prettierOpt),
         panelType: 'vue',
-      },
-      {
-        panelName: 'index.css',
-        panelValue: prettier.format(`${styles.join('\n')}`, {parser: 'css'}),
-        panelType: 'css'
       },
       {
         panelName: 'index.response.css',
