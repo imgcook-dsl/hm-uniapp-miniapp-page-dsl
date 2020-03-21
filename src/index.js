@@ -179,24 +179,11 @@ module.exports = function(schema, option) {
   const parseDataSource = (data) => {
     const name = data.id;
     const {uri, method, params} = data.options;
-    const action = data.type;
+    const action = data.description || 'getOne';
     let payload = {};
 
-    switch (action) {
-      case 'fetch':
-        if (imports.indexOf(`import {request, fetch} from '@/common/request'`) === -1) {
-          imports.push(`import {request, fetch} from '@/common/request'`);
-        }
-        payload = {
-          method: method
-        };
-
-        break;
-      case 'jsonp':
-        if (imports.indexOf(`import {fetchJsonp} from fetch-jsonp`) === -1) {
-          imports.push(`import jsonp from 'fetch-jsonp'`);
-        }
-        break;
+    if (imports.indexOf(`import {getOne, getAll} from '@/common/request'`) === -1) {
+      imports.push(`import {getOne, getAll} from '@/common/request'`);
     }
 
     Object.keys(data.options).forEach((key) => {
@@ -207,15 +194,21 @@ module.exports = function(schema, option) {
 
     // params parse should in string template
     if (params) {
-      payload = `${toString(payload).slice(0, -1)} ,body: ${isExpression(params) ? parseProps(params) : toString(params)}}`;
+      payload = `${isExpression(params) ? parseProps(params) : toString(params)}`;
     } else {
       payload = toString(payload);
     }
 
-    let result = `{
+    let result;
+    if (action == 'getOne') {
+      result = `{
+        ${action}(${parseProps(uri)})
+          .then((response) => response.data.data.data)`;
+    } else {
+      result = `{
       ${action}(${parseProps(uri)}, ${toString(payload)})
-        .then((response) => response.json())
-    `;
+        .then((response) => response.data.data.data.records)`;
+    }
 
     if (data.dataHandler) {
       const { params, content } = parseFunction(data.dataHandler);
