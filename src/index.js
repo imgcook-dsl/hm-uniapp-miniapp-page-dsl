@@ -151,13 +151,11 @@ module.exports = function(schema, option) {
       }
 
       if (isReactNode) {
-        defaultProps[constantName] = value;
-        return `{{${constantName}}}`;
+        defaultProps[_.camelCase(constantName)] = value;
+        return `{{${_.camelCase(constantName)}}}`;
       } else if (constantName) { // save to constant
-        // expressionName[constantName] = expressionName[constantName] ? expressionName[constantName] + 1 : 1;
-        // const name = `${constantName}${expressionName[constantName]}`;
-        defaultProps[constantName] = value;
-        return `"${constantName}"`;
+        defaultProps[_.camelCase(constantName)] = value;
+        return `"${_.camelCase(constantName)}"`;
       } else {
         return `"${value}"`;
       }
