@@ -1,4 +1,4 @@
-# 毫末科技Jeecg DSL
+# 毫末科技uniapp 页面 DSL
 
 > 官网：[https://haomo-tech.com](https://haomo-tech.com)
 
